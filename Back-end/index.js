@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 app.get('/', (req, res) => {
     res.json({ 
         success: true,
-        message: '🍺 API Hamilton Bar funcionando correctamente',
+        message: ' API Nalu-Marroquineria funcionando correctamente',
         version: '1.0.0',
         endpoints: {
             productos: '/productos',

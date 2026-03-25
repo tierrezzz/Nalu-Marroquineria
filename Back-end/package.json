@@ -1,7 +1,7 @@
 {
-  "name": "Hamilton-back-end",
+  "name": "nalu-marroquineria-backend",
   "version": "1.0.0",
-  "description": "Backend para sistema de reservas de bar",
+  "description": "Backend para sistema web para marroquineria",
   "main": "index.js",
   "type": "module",
 "scripts": {

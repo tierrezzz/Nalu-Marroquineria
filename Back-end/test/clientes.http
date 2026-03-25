@@ -4,7 +4,7 @@ GET {{url}}/clientes
 Accept: application/json
 
 ### Obtener cliente por ID
-GET {{url}}/clientes/1
+GET {{url}}/clientes/6
 Accept: application/json
 
 ### Crear nuevo cliente

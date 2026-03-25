@@ -1,6 +1,6 @@
 import { body, query } from "express-validator";
 import express from "express";
-import { db } from "../db.js";
+import { pool } from "../db.js";
 import { validarId, verificarValidaciones } from "../middlewares/validaciones.js";
 
 const router = express.Router();
@@ -58,7 +58,7 @@ async function verificarDisponibilidad(fecha, horaInicio, horaFin, reservaId = n
   const diaSemana = dias[fechaObj.getDay()];
 
   // Verificar si hay horarios disponibles para ese día
-  const [horarios] = await db.execute(
+  const [horarios] = await pool.execute(
     `SELECT * FROM horarios_disponibles 
     WHERE dia_semana = ? AND activo = true`,
     [diaSemana]
@@ -107,7 +107,7 @@ async function verificarDisponibilidad(fecha, horaInicio, horaFin, reservaId = n
     params.push(reservaId);
   }
 
-  const [conflictos] = await db.execute(sql, params);
+  const [conflictos] = await pool.execute(sql, params);
 
   if (conflictos.length > 0) {
     return {
@@ -162,7 +162,7 @@ router.get("/", validarFiltros, verificarValidaciones, async (req, res) => {
 
     sql += " ORDER BY r.fecha_reserva DESC, r.hora_inicio DESC";
 
-    const [rows] = await db.execute(sql, parametros);
+    const [rows] = await pool.execute(sql, parametros);
     res.json({ success: true, data: rows });
   } catch (error) {
     console.error("Error al listar reservas:", error);
@@ -178,7 +178,7 @@ router.get("/:id", validarId, verificarValidaciones, async (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    const [rows] = await db.execute(
+    const [rows] = await pool.execute(
       `SELECT 
         r.*,
         c.nombre AS cliente_nombre,
@@ -222,7 +222,7 @@ router.post("/", validarReserva, verificarValidaciones, async (req, res) => {
     const fechaStr = new Date(fecha_reserva).toISOString().split('T')[0];
 
     // Verificar que el cliente existe
-    const [cliente] = await db.execute(
+    const [cliente] = await pool.execute(
       "SELECT id FROM clientes WHERE id = ?",
       [cliente_id]
     );
@@ -249,7 +249,7 @@ router.post("/", validarReserva, verificarValidaciones, async (req, res) => {
     }
 
     // Verificar capacidad máxima
-    const [config] = await db.execute(
+    const [config] = await pool.execute(
       "SELECT valor FROM configuracion WHERE clave = 'capacidad_maxima'"
     );
 
@@ -267,7 +267,7 @@ router.post("/", validarReserva, verificarValidaciones, async (req, res) => {
     let horaFinNorm = hora_fin.length === 5 ? hora_fin + ':00' : hora_fin;
 
     // Crear la reserva
-    const [result] = await db.execute(
+    const [result] = await pool.execute(
       `INSERT INTO reservas 
         (cliente_id, fecha_reserva, hora_inicio, hora_fin, numero_personas, estado) 
       VALUES (?, ?, ?, ?, ?, 'pendiente')`,
@@ -321,7 +321,7 @@ router.put(
       const fechaStr = new Date(fecha_reserva).toISOString().split('T')[0];
 
       // Verificar que la reserva existe
-      const [reservaExiste] = await db.execute(
+      const [reservaExiste] = await pool.execute(
         "SELECT id, estado FROM reservas WHERE id = ?",
         [id]
       );
@@ -342,7 +342,7 @@ router.put(
       }
 
       // Verificar que el cliente existe
-      const [cliente] = await db.execute(
+      const [cliente] = await pool.execute(
         "SELECT id FROM clientes WHERE id = ?",
         [cliente_id]
       );
@@ -375,7 +375,7 @@ router.put(
       let horaFinNorm = hora_fin.length === 5 ? hora_fin + ':00' : hora_fin;
 
       // Actualizar la reserva
-      await db.execute(
+      await pool.execute(
         `UPDATE reservas 
         SET cliente_id = ?, fecha_reserva = ?, hora_inicio = ?, hora_fin = ?, 
             numero_personas = ?, observaciones = ?
@@ -416,7 +416,7 @@ router.patch(
       const id = Number(req.params.id);
       const { estado } = req.body;
 
-      const [reserva] = await db.execute(
+      const [reserva] = await pool.execute(
         "SELECT id FROM reservas WHERE id = ?",
         [id]
       );
@@ -428,7 +428,7 @@ router.patch(
         });
       }
 
-      await db.execute(
+      await pool.execute(
         "UPDATE reservas SET estado = ? WHERE id = ?",
         [estado, id]
       );
@@ -457,7 +457,7 @@ router.delete(
       const id = Number(req.params.id);
 
       // En lugar de eliminar, cambiar estado a cancelada
-      const [reserva] = await db.execute(
+      const [reserva] = await pool.execute(
         "SELECT id, estado FROM reservas WHERE id = ?",
         [id]
       );
@@ -469,7 +469,7 @@ router.delete(
         });
       }
 
-      await db.execute(
+      await pool.execute(
         "UPDATE reservas SET estado = 'cancelada' WHERE id = ?",
         [id]
       );

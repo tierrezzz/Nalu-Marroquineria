@@ -1,6 +1,6 @@
 import { body, query } from "express-validator";
 import express from "express";
-import { db } from "../db.js";
+import { pool } from "../db.js";
 import { validarId, verificarValidaciones } from "../middlewares/validaciones.js";
 
 const router = express.Router();
@@ -52,7 +52,7 @@ router.get("/", validarFiltros, verificarValidaciones, async (req, res) => {
 
     sql += " ORDER BY apellido, nombre";
 
-    const [rows] = await db.execute(sql, parametros);
+    const [rows] = await pool.execute(sql, parametros);
     res.json({ success: true, data: rows });
   } catch (error) {
     console.error("Error al listar clientes:", error);
@@ -68,7 +68,7 @@ router.get("/:id", validarId, verificarValidaciones, async (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    const [rows] = await db.execute(
+    const [rows] = await pool.execute(
       "SELECT * FROM clientes WHERE id = ?",
       [id]
     );
@@ -95,7 +95,7 @@ router.get("/:id/reservas", validarId, verificarValidaciones, async (req, res) =
   try {
     const id = Number(req.params.id);
 
-    const [rows] = await db.execute(
+    const [rows] = await pool.execute(
       `SELECT 
         r.id,
         r.fecha_reserva,
@@ -127,7 +127,7 @@ router.post("/", validarCliente, verificarValidaciones, async (req, res) => {
     const { nombre, apellido, telefono, email } = req.body;
 
     // Verificar si el teléfono ya existe
-    const [existeTelefono] = await db.execute(
+    const [existeTelefono] = await pool.execute(
       "SELECT id FROM clientes WHERE telefono = ?",
       [telefono]
     );
@@ -141,7 +141,7 @@ router.post("/", validarCliente, verificarValidaciones, async (req, res) => {
 
     // Verificar si el email ya existe (solo si se proporcionó)
     if (email) {
-      const [existeEmail] = await db.execute(
+      const [existeEmail] = await pool.execute(
         "SELECT id FROM clientes WHERE email = ?",
         [email]
       );
@@ -154,7 +154,7 @@ router.post("/", validarCliente, verificarValidaciones, async (req, res) => {
       }
     }
 
-    const [result] = await db.execute(
+    const [result] = await pool.execute(
       `INSERT INTO clientes 
         (nombre, apellido, telefono, email) 
       VALUES (?, ?, ?, ?)`,
@@ -193,7 +193,7 @@ router.put(
       const { nombre, apellido, telefono, email } = req.body;
 
       // Verificar si el cliente existe
-      const [clienteExiste] = await db.execute(
+      const [clienteExiste] = await pool.execute(
         "SELECT id FROM clientes WHERE id = ?",
         [id]
       );
@@ -206,7 +206,7 @@ router.put(
       }
 
       // Verificar si el teléfono ya está en uso por otro cliente
-      const [telefonoExiste] = await db.execute(
+      const [telefonoExiste] = await pool.execute(
         "SELECT id FROM clientes WHERE telefono = ? AND id != ?",
         [telefono, id]
       );
@@ -220,7 +220,7 @@ router.put(
 
       // Verificar si el email ya está en uso por otro cliente (solo si se proporcionó)
       if (email) {
-        const [emailExiste] = await db.execute(
+        const [emailExiste] = await pool.execute(
           "SELECT id FROM clientes WHERE email = ? AND id != ?",
           [email, id]
         );
@@ -233,7 +233,7 @@ router.put(
         }
       }
 
-      await db.execute(
+      await pool.execute(
         `UPDATE clientes 
         SET nombre = ?, apellido = ?, telefono = ?, email = ?
         WHERE id = ?`,
@@ -265,7 +265,7 @@ router.delete(
       const id = Number(req.params.id);
 
       // Verificar si el cliente existe
-      const [clienteExiste] = await db.execute(
+      const [clienteExiste] = await pool.execute(
         "SELECT id FROM clientes WHERE id = ?",
         [id]
       );
@@ -278,7 +278,7 @@ router.delete(
       }
       // implementar cuando esten todas las tablas hechas.
       /* Verificar si tiene reservas ACTIVAS
-      const [reservasActivas] = await db.execute(
+      const [reservasActivas] = await pool.execute(
         `SELECT COUNT(*) as count 
          FROM reservas 
          WHERE cliente_id = ? 
@@ -291,10 +291,10 @@ router.delete(
           success: false,
           message: "No se puede eliminar el cliente porque tiene reservas activas"
         });
-    }*/
+      }*/
 
       // Eliminar el cliente
-      await db.execute("DELETE FROM clientes WHERE id = ?", [id]);
+      await pool.execute("DELETE FROM clientes WHERE id = ?", [id]);
       
       res.json({ 
         success: true, 

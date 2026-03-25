@@ -1,6 +1,6 @@
 import { body, query } from "express-validator";
 import express from "express";
-import { db } from "../db.js";
+import { pool } from "../db.js";
 import { validarId, verificarValidaciones } from "../middlewares/validaciones.js";
 
 const router = express.Router();
@@ -54,7 +54,7 @@ router.get("/", validarFiltros, verificarValidaciones, async (req, res) => {
 
     sql += " ORDER BY p.categoria_id, p.nombre";
 
-    const [rows] = await db.execute(sql, parametros);
+    const [rows] = await pool.execute(sql, parametros);
     res.json({ success: true, data: rows });
   } catch (error) {
     console.error("Error al listar productos:", error);
@@ -70,7 +70,7 @@ router.get("/:id", validarId, verificarValidaciones, async (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    const [rows] = await db.execute(
+    const [rows] = await pool.execute(
       `SELECT 
         p.*, 
         c.nombre AS categoria 
@@ -108,7 +108,7 @@ router.post("/", validarProducto, verificarValidaciones, async (req, res) => {
     } = req.body;
 
     // Verificar si ya existe un producto con ese nombre
-    const [existe] = await db.execute(
+    const [existe] = await pool.execute(
       "SELECT id, nombre FROM productos WHERE nombre = ?",
       [nombre]
     );
@@ -121,7 +121,7 @@ router.post("/", validarProducto, verificarValidaciones, async (req, res) => {
     }
 
     // Verificar que la categoría existe
-    const [categoriaExiste] = await db.execute(
+    const [categoriaExiste] = await pool.execute(
       "SELECT id FROM categorias WHERE id = ?",
       [categoria_id]
     );
@@ -133,7 +133,7 @@ router.post("/", validarProducto, verificarValidaciones, async (req, res) => {
       });
     }
 
-    const [result] = await db.execute(
+    const [result] = await pool.execute(
       `INSERT INTO productos 
         (nombre, descripcion, precio, categoria_id) 
       VALUES (?, ?, ?, ?)`,
@@ -180,7 +180,7 @@ router.put(
       } = req.body;
 
       // Verificar si el producto existe
-      const [productoExiste] = await db.execute(
+      const [productoExiste] = await pool.execute(
         "SELECT id, nombre FROM productos WHERE id = ?",
         [id]
       );
@@ -194,7 +194,7 @@ router.put(
 
       // Solo verificar nombre duplicado si está cambiando el nombre
       if (nombre !== productoExiste[0].nombre) {
-        const [nombreExiste] = await db.execute(
+        const [nombreExiste] = await pool.execute(
           "SELECT id FROM productos WHERE nombre = ? AND id != ?",
           [nombre, id]
         );
@@ -208,7 +208,7 @@ router.put(
       }
 
       // Verificar que la categoría existe
-      const [categoriaExiste] = await db.execute(
+      const [categoriaExiste] = await pool.execute(
         "SELECT id FROM categorias WHERE id = ?",
         [categoria_id]
       );
@@ -220,7 +220,7 @@ router.put(
         });
       }
 
-      await db.execute(
+      await pool.execute(
         `UPDATE productos 
         SET nombre = ?, descripcion = ?, precio = ?, categoria_id = ?
         WHERE id = ?`,
@@ -257,7 +257,7 @@ router.delete(
       const id = Number(req.params.id);
 
       // Verificar si el producto existe
-      const [productoExiste] = await db.execute(
+      const [productoExiste] = await pool.execute(
         "SELECT id FROM productos WHERE id = ?",
         [id]
       );
@@ -269,7 +269,7 @@ router.delete(
         });
       }
 
-      await db.execute("DELETE FROM productos WHERE id = ?", [id]);
+      await pool.execute("DELETE FROM productos WHERE id = ?", [id]);
       
       res.json({ 
         success: true, 

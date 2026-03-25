@@ -1,6 +1,6 @@
 import { query } from "express-validator";
 import express from "express";
-import { db } from "../db.js";
+import { pool } from "../db.js";
 import { verificarValidaciones } from "../middlewares/validaciones.js";
 
 const router = express.Router();
@@ -13,10 +13,10 @@ const validarConsultaDisponibilidad = [
 // GET - Listar todos los horarios de operación
 router.get("/", async (req, res) => {
   try {
-    const [rows] = await db.execute(
+    const [rows] = await pool.execute(
       `SELECT * FROM horarios_disponibles 
-       WHERE activo = true
-       ORDER BY 
+        WHERE activo = true
+        ORDER BY 
         FIELD(dia_semana, 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'),
         hora_inicio`
     );
@@ -47,7 +47,7 @@ router.get(
       const diaSemana = dias[fechaObj.getDay()];
 
       // Obtener horarios disponibles para ese día
-      const [horarios] = await db.execute(
+      const [horarios] = await pool.execute(
         `SELECT * FROM horarios_disponibles 
         WHERE dia_semana = ? AND activo = true
         ORDER BY hora_inicio`,
@@ -69,7 +69,7 @@ router.get(
       }
 
       // Obtener reservas confirmadas o en curso para esa fecha
-      const [reservas] = await db.execute(
+      const [reservas] = await pool.execute(
         `SELECT hora_inicio, hora_fin, numero_personas, estado
         FROM reservas 
         WHERE fecha_reserva = ? AND estado IN ('confirmada', 'en_curso')
@@ -133,7 +133,7 @@ router.get(
       }
 
       // Obtener todas las reservas en el rango
-      const [reservas] = await db.execute(
+      const [reservas] = await pool.execute(
         `SELECT fecha_reserva, COUNT(*) as cantidad
         FROM reservas 
         WHERE fecha_reserva BETWEEN ? AND ? 

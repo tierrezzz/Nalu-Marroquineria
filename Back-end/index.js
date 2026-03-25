@@ -8,6 +8,8 @@ import productosRouter from './routes/productos.js';
 import clientesRouter from './routes/clientes.js';
 import reservasRouter from './routes/reservas.js';
 import horariosRouter from './routes/horarios.js';
+import usuariosRouter from './routes/usuarios.js';
+import authRouter, { authConfig } from "./routes/auth.js"; 
 
 dotenv.config();
 
@@ -20,6 +22,9 @@ const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
+
+// Configurar Passport (para auth.js)
+authConfig();
 
 // Logger simple
 app.use((req, res, next) => {
@@ -70,6 +75,8 @@ app.use('/productos', productosRouter);
 app.use('/clientes', clientesRouter);
 app.use('/reservas', reservasRouter);
 app.use('/horarios', horariosRouter);
+app.use('/usuarios', usuariosRouter);
+app.use("/auth", authRouter);
 
 // ========================================
 // MANEJO DE ERRORES

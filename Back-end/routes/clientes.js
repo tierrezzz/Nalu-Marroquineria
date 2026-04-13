@@ -1,315 +1,122 @@
-import { body, query } from "express-validator";
 import express from "express";
 import { pool } from "../db.js";
-import { validarId, verificarValidaciones } from "../middlewares/validaciones.js";
+import { validarId, verificarValidaciones, esAdmin } from "../middlewares/validaciones.js"; 
+import { body } from "express-validator";
+import bcrypt from "bcrypt";
+import { verificarAutenticacion } from "./auth.js";
 
 const router = express.Router();
 
-// Validaciones para filtros
-const validarFiltros = [
-  query("nombre").isString().optional(),
-  query("apellido").isString().optional(),
-  query("telefono").isString().optional(),
-  query("email").isEmail().optional(),
-];
-
-// Validaciones para crear/actualizar cliente
-const validarCliente = [
-  body("nombre", "Nombre inválido").isString().isLength({ min: 1, max: 100 }),
-  body("apellido", "Apellido inválido").isString().isLength({ min: 1, max: 100 }),
-  body("telefono", "Teléfono inválido").isString().isLength({ min: 7, max: 15 }),
-  body("email", "Email inválido").isEmail().optional(),
-];
-
-// GET - Listar clientes con filtros
-router.get("/", validarFiltros, verificarValidaciones, async (req, res) => {
+// GET /usuarios - Listar todos (SOLO ADMIN)
+router.get("/", verificarAutenticacion, esAdmin, async (req, res) => {
   try {
-    const filtros = [];
-    const parametros = [];
-
-    const { nombre, telefono, email } = req.query;
-
-    if (nombre) {
-      filtros.push("(nombre LIKE ? OR apellido LIKE ?)");
-      parametros.push(`%${nombre}%`, `%${nombre}%`);
-    }
-
-    if (telefono) {
-      filtros.push("telefono LIKE ?");
-      parametros.push(`%${telefono}%`);
-    }
-
-    if (email) {
-      filtros.push("email LIKE ?");
-      parametros.push(`%${email}%`);
-    }
-
-    let sql = "SELECT * FROM clientes";
-
-    if (filtros.length > 0) {
-      sql += " WHERE " + filtros.join(" AND ");
-    }
-
-    sql += " ORDER BY apellido, nombre";
-
-    const [rows] = await pool.execute(sql, parametros);
-    res.json({ success: true, data: rows });
+    const [rows] = await pool.execute("SELECT id, username, rol FROM usuarios"); 
+    res.json({ success: true, usuarios: rows });
   } catch (error) {
-    console.error("Error al listar clientes:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Error al listar clientes" 
-    });
+    console.error("Error en GET /usuarios:", error);
+    res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 });
 
-// GET - Obtener cliente por ID
-router.get("/:id", validarId, verificarValidaciones, async (req, res) => {
+// GET /usuarios/:id - Obtener uno (ADMIN o el mismo usuario)
+router.get("/:id", verificarAutenticacion, validarId, verificarValidaciones, async (req, res) => {
   try {
     const id = Number(req.params.id);
 
-    const [rows] = await pool.execute(
-      "SELECT * FROM clientes WHERE id = ?",
-      [id]
-    );
+    // Seguridad extra: Solo admin puede ver a otros. El usuario común solo se ve a sí mismo.
+    if (req.user.rol !== 'admin' && req.user.id !== id) {
+        return res.status(403).json({ success: false, error: "No tienes permiso para ver este perfil" });
+    }
 
+    const [rows] = await pool.execute("SELECT id, username, rol FROM usuarios WHERE id = ?", [id]);
     if (rows.length === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Cliente no encontrado" 
-      });
+      return res.status(404).json({ success: false, error: "Usuario no encontrado" });
     }
-
-    res.json({ success: true, data: rows[0] });
+    res.json({ success: true, usuario: rows[0] });
   } catch (error) {
-    console.error("Error al obtener cliente:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Error al obtener cliente" 
-    });
+    res.status(500).json({ success: false, error: "Error interno" });
   }
 });
 
-// GET - Obtener reservas de un cliente
-router.get("/:id/reservas", validarId, verificarValidaciones, async (req, res) => {
-  try {
-    const id = Number(req.params.id);
+// POST /usuarios - Registro de usuario (Público - por defecto CLIENTE)
+router.post(
+  "/",
+  body("username", "Nombre de usuario inválido").notEmpty().isLength({ max: 50 }), 
+  body("password", "Contraseña inválida (mín. 8 caracteres, 1 número)").isStrongPassword({
+    minLength: 8, minLowercase: 1, minUppercase: 0, minNumbers: 1, minSymbols: 0,
+  }),
+  verificarValidaciones,
+  async (req, res) => {
+    try {
+      const { username, password } = req.body; 
 
-    const [rows] = await pool.execute(
-      `SELECT 
-        r.id,
-        r.fecha_reserva,
-        r.hora_inicio,
-        r.hora_fin,
-        r.numero_personas,
-        r.tipo_reunion,
-        r.estado,
-        r.motivo
-      FROM reservas r
-      WHERE r.cliente_id = ?
-      ORDER BY r.fecha_reserva DESC, r.hora_inicio DESC`,
-      [id]
-    );
+      const [usernames] = await pool.execute("SELECT id FROM usuarios WHERE username = ?", [username]);
+      if (usernames.length > 0) {
+        return res.status(400).json({ success: false, error: "El nombre de usuario ya existe" });
+      }
+      
+      const hashedPassword = await bcrypt.hash(password, 12);
 
-    res.json({ success: true, data: rows });
-  } catch (error) {
-    console.error("Error al obtener reservas del cliente:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Error al obtener reservas del cliente" 
-    });
-  }
-});
-
-// POST - Crear cliente
-router.post("/", validarCliente, verificarValidaciones, async (req, res) => {
-  try {
-    const { nombre, apellido, telefono, email } = req.body;
-
-    // Verificar si el teléfono ya existe
-    const [existeTelefono] = await pool.execute(
-      "SELECT id FROM clientes WHERE telefono = ?",
-      [telefono]
-    );
-
-    if (existeTelefono.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Ya existe un cliente con ese teléfono"
-      });
-    }
-
-    // Verificar si el email ya existe (solo si se proporcionó)
-    if (email) {
-      const [existeEmail] = await pool.execute(
-        "SELECT id FROM clientes WHERE email = ?",
-        [email]
+      // Importante: El rol por defecto es 'cliente' (seguridad)
+      const [result] = await pool.execute(
+        "INSERT INTO usuarios (username, password, rol) VALUES (?, ?, 'cliente')",
+        [username, hashedPassword]
       );
 
-      if (existeEmail.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: "Ya existe un cliente con ese email"
-        });
-      }
+      res.status(201).json({
+        success: true,
+        data: { id: result.insertId, username, rol: 'cliente' }, 
+      });
+
+    } catch (error) {
+       res.status(500).json({ success: false, error: "Error interno" });
     }
-
-    const [result] = await pool.execute(
-      `INSERT INTO clientes 
-        (nombre, apellido, telefono, email) 
-      VALUES (?, ?, ?, ?)`,
-      [nombre, apellido, telefono, email || null]
-    );
-
-    res.status(201).json({
-      success: true,
-      data: { 
-        id: result.insertId, 
-        nombre, 
-        apellido, 
-        telefono,
-        email: email || null
-      },
-    });
-
-  } catch (error) {
-    console.error("Error al crear cliente:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Error al crear cliente" 
-    });
   }
-});
+);
 
-// PUT - Actualizar cliente
+// PUT /usuarios/:id - Actualizar (ADMIN o el mismo usuario)
 router.put(
   "/:id",
+  verificarAutenticacion,
   validarId,
-  validarCliente,
   verificarValidaciones,
   async (req, res) => {
+    const id = Number(req.params.id);
+    const { username, password, rol } = req.body;
+
+    // Solo el Admin puede cambiar el ROL de alguien
+    if (rol && req.user.rol !== 'admin') {
+        return res.status(403).json({ success: false, error: "No puedes cambiar tu propio rol" });
+    }
+
     try {
-      const id = Number(req.params.id);
-      const { nombre, apellido, telefono, email } = req.body;
+      const [usuarioActual] = await pool.execute("SELECT * FROM usuarios WHERE id = ?", [id]);
+      if (usuarioActual.length === 0) return res.status(404).json({ error: "Usuario no encontrado" });
 
-      // Verificar si el cliente existe
-      const [clienteExiste] = await pool.execute(
-        "SELECT id FROM clientes WHERE id = ?",
-        [id]
-      );
-
-      if (clienteExiste.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "Cliente no encontrado"
-        });
-      }
-
-      // Verificar si el teléfono ya está en uso por otro cliente
-      const [telefonoExiste] = await pool.execute(
-        "SELECT id FROM clientes WHERE telefono = ? AND id != ?",
-        [telefono, id]
-      );
-
-      if (telefonoExiste.length > 0) {
-        return res.status(400).json({
-          success: false,
-          message: "El teléfono ya está en uso por otro cliente"
-        });
-      }
-
-      // Verificar si el email ya está en uso por otro cliente (solo si se proporcionó)
-      if (email) {
-        const [emailExiste] = await pool.execute(
-          "SELECT id FROM clientes WHERE email = ? AND id != ?",
-          [email, id]
-        );
-
-        if (emailExiste.length > 0) {
-          return res.status(400).json({
-            success: false,
-            message: "El email ya está en uso por otro cliente"
-          });
-        }
-      }
+      let nuevoPassword = password ? await bcrypt.hash(password, 12) : usuarioActual[0].password;
+      let nuevoRol = (req.user.rol === 'admin' && rol) ? rol : usuarioActual[0].rol;
 
       await pool.execute(
-        `UPDATE clientes 
-        SET nombre = ?, apellido = ?, telefono = ?, email = ?
-        WHERE id = ?`,
-        [nombre, apellido, telefono, email || null, id]
+        "UPDATE usuarios SET username = ?, password = ?, rol = ? WHERE id = ?",
+        [username || usuarioActual[0].username, nuevoPassword, nuevoRol, id]
       );
 
-      res.json({
-        success: true,
-        data: { id, nombre, apellido, telefono, email: email || null },
-      });
-
+      res.json({ success: true, message: "Usuario actualizado correctamente" });
     } catch (error) {
-      console.error("Error al actualizar cliente:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Error al actualizar cliente" 
-      });
+      res.status(500).json({ success: false, error: "Error interno" });
     }
   }
 );
 
-// DELETE - Eliminar cliente
-router.delete(
-  "/:id",
-  validarId,
-  verificarValidaciones,
-  async (req, res) => {
-    try {
-      const id = Number(req.params.id);
-
-      // Verificar si el cliente existe
-      const [clienteExiste] = await pool.execute(
-        "SELECT id FROM clientes WHERE id = ?",
-        [id]
-      );
-
-      if (clienteExiste.length === 0) {
-        return res.status(404).json({
-          success: false,
-          message: "Cliente no encontrado"
-        });
-      }
-      // implementar cuando esten todas las tablas hechas.
-      /* Verificar si tiene reservas ACTIVAS
-      const [reservasActivas] = await pool.execute(
-        `SELECT COUNT(*) as count 
-         FROM reservas 
-         WHERE cliente_id = ? 
-         AND estado IN ('pendiente', 'confirmada', 'en_curso')`,
-        [id]
-      );
-
-      if (reservasActivas[0].count > 0) {
-        return res.status(400).json({
-          success: false,
-          message: "No se puede eliminar el cliente porque tiene reservas activas"
-        });
-      }*/
-
-      // Eliminar el cliente
-      await pool.execute("DELETE FROM clientes WHERE id = ?", [id]);
-      
-      res.json({ 
-        success: true, 
-        message: "Cliente eliminado correctamente",
-        data: { id } 
-      });
-
-    } catch (error) {
-      console.error("Error al eliminar cliente:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Error al eliminar cliente" 
-      });
-    }
+// DELETE /usuarios/:id - Eliminar (SOLO ADMIN)
+router.delete("/:id", verificarAutenticacion, esAdmin, validarId, verificarValidaciones, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    await pool.execute("DELETE FROM usuarios WHERE id = ?", [id]);
+    res.json({ success: true, message: "Usuario eliminado" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Error interno" });
   }
-);
+});
 
 export default router;

@@ -1,6 +1,5 @@
 @url = http://localhost:3000
-
-### Obtener todos los productos
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJGYWN1bmRvIiwicm9sIjoiYWRtaW4iLCJpYXQiOjE3NzYwNTYyNjgsImV4cCI6MTc3NjA3MDY2OH0.SLR-b24yVUM1bpjZKPR4aJikh4M7Wf3--dgnf8sTJGU
 GET {{url}}/productos
 Accept: application/json
 
@@ -8,31 +7,37 @@ Accept: application/json
 GET {{url}}/productos/1
 Accept: application/json
 
-### Filtrar productos por categoría
-GET {{url}}/productos?categoria_id=2
+### Filtrar productos por categoría (Ej: Mochilas)
+GET {{url}}/productos?categoria_id=1
 Accept: application/json
 
-### Crear nuevo producto
+### Crear nuevo producto (Sin imagen)
+# Importante: precio -> precio_base
 POST {{url}}/productos
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "nombre": "Cerveza Budweiser",
-  "descripcion": "Cerveza IPA local",
-  "precio": 8.50,
-  "categoria_id": 2
+  "nombre": "Mochila Nalu Cuero",
+  "descripcion": "Mochila artesanal de cuero vacuno con forrería interna",
+  "precio_base": 45000.00,
+  "categoria_id": 1,
+  "activo": true
 }
 
 ### Actualizar producto
-PUT {{url}}/productos/4
+PUT {{url}}/productos/1
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "nombre": "Cerveza Budweiser ",
-  "precio": 9.50,
-  "descripcion": "Cerveza de 475ml",
-  "categoria_id": 3
+  "nombre": "Mochila Nalu Cuero - Reforzada",
+  "descripcion": "Versión con costuras reforzadas y cierres YKK",
+  "precio_base": 48500.00,
+  "categoria_id": 1,
+  "activo": true
 }
 
 ### Eliminar producto
-DELETE {{url}}/productos/3
+DELETE {{url}}/productos/1
+Authorization: Bearer {{token}}

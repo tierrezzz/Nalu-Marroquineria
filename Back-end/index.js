@@ -4,26 +4,26 @@ import dotenv from 'dotenv';
 import { conectarDB } from './db.js';
 
 // Importar rutas
+import authRouter, { authConfig } from "./routes/auth.js"; 
+import usuariosRouter from './routes/usuarios.js';
 import productosRouter from './routes/productos.js';
 import clientesRouter from './routes/clientes.js';
-import reservasRouter from './routes/reservas.js';
-import horariosRouter from './routes/horarios.js';
-import usuariosRouter from './routes/usuarios.js';
-import authRouter, { authConfig } from "./routes/auth.js"; 
+import categoriasRouter from './routes/categorias.js';
+import variantesRouter from './routes/variantes.js'; 
+// import pedidosRouter from './routes/pedidos.js';     
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 // ========================================
 // MIDDLEWARES
 // ========================================
-
 app.use(cors());
 app.use(express.json());
 
-// Configurar Passport (para auth.js)
+// Configurar Passport
 authConfig();
 
 // Logger simple
@@ -36,87 +36,62 @@ app.use((req, res, next) => {
 // RUTAS
 // ========================================
 
-// Ruta de prueba
+// Ruta de bienvenida
 app.get('/', (req, res) => {
     res.json({ 
         success: true,
-        message: ' API Nalu-Marroquineria funcionando correctamente',
+        message: '👜 API Nalu Marroquinería - Gestión de Stock y Ventas',
         version: '1.0.0',
         endpoints: {
+            auth: '/auth',
             productos: '/productos',
             clientes: '/clientes',
-            reservas: '/reservas',
-            horarios: '/horarios'
+            // variantes: '/variantes',
+            // pedidos: '/pedidos'
         }
     });
 });
 
-// Ruta para verificar estado de la BD
+// Salud de la BD
 app.get('/health', async (req, res) => {
     try {
-        const { db } = await import('./db.js');
-        const [result] = await db.execute('SELECT 1 as ok');
-        res.json({ 
-            success: true, 
-            database: 'connected',
-            timestamp: new Date().toISOString()
-        });
+        const { pool } = await import('./db.js');
+        const [result] = await pool.execute('SELECT 1 as ok');
+        res.json({ success: true, database: 'connected' });
     } catch (error) {
-        res.status(500).json({ 
-            success: false, 
-            database: 'disconnected',
-            error: error.message 
-        });
+        res.status(500).json({ success: false, database: 'disconnected', error: error.message });
     }
 });
 
-// Montar rutas de la API
+// rutas
+app.use("/auth", authRouter);
+app.use('/usuarios', usuariosRouter);
 app.use('/productos', productosRouter);
 app.use('/clientes', clientesRouter);
-app.use('/reservas', reservasRouter);
-app.use('/horarios', horariosRouter);
-app.use('/usuarios', usuariosRouter);
-app.use("/auth", authRouter);
+app.use('/categorias', categoriasRouter);
+app.use('/variantes', variantesRouter);
+// app.use('/pedidos', pedidosRouter);
 
 // ========================================
 // MANEJO DE ERRORES
 // ========================================
-
-// Ruta no encontrada
 app.use((req, res) => {
-    res.status(404).json({ 
-        success: false,
-        message: 'Ruta no encontrada',
-        path: req.url
-    });
+    res.status(404).json({ success: false, message: 'Ruta no encontrada' });
 });
 
-// Manejo de errores
 app.use((err, req, res, next) => {
     console.error('Error:', err.stack);
-    res.status(500).json({ 
-        success: false,
-        message: 'Error interno del servidor'
-    });
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
 });
 
 // ========================================
 // INICIAR SERVIDOR
 // ========================================
-
 async function iniciarServidor() {
     try {
         await conectarDB();
-        console.log('✅ Conexión a MySQL establecida');
-        
         app.listen(PORT, () => {
-            console.log('\n📋 Endpoints disponibles:');
-            console.log(`   GET    http://localhost:${PORT}/`);
-            console.log(`   GET    http://localhost:${PORT}/health`);
-            console.log(`   CRUD   http://localhost:${PORT}/productos`);
-            console.log(`   CRUD   http://localhost:${PORT}/clientes`);
-            console.log(`   CRUD   http://localhost:${PORT}/reservas`);
-            console.log(`   CRUD   http://localhost:${PORT}/horarios\n`);
+            console.log(`✅ Servidor Nalu Marroquinería corriendo en puerto ${PORT}`);
         });
     } catch (error) {
         console.error('Error al iniciar servidor:', error.message);

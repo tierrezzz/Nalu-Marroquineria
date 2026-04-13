@@ -1,0 +1,37 @@
+### Configuración de Variables
+@url = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJGYWN1bmRvIiwicm9sIjoiYWRtaW4iLCJpYXQiOjE3NzYwNTYyNjgsImV4cCI6MTc3NjA3MDY2OH0.SLR-b24yVUM1bpjZKPR4aJikh4M7Wf3--dgnf8sTJGU
+
+### 1. Listar todas las categorías (Público)
+GET {{url}}/categorias
+Content-Type: application/json
+
+###
+
+### 2. Crear una nueva categoría (Requiere Auth)
+POST {{url}}/categorias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nombre": "Mochilas "
+}
+
+###
+
+### 3. Crear otra categoría para probar duplicados
+POST {{url}}/categorias
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nombre": "Billeteras"
+}
+
+###
+
+### 4. Eliminar una categoría (Requiere Auth)
+# Reemplaza el ID por uno que exista en tu base de datos
+DELETE {{url}}/categorias/1
+Authorization: Bearer {{token}}
+Content-Type: application/json

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, User, ShoppingCart } from 'lucide-react';
+import { Link } from 'react-router-dom'; // <-- 1. Agregamos esta importación
 
 const Navbar = () => {
   return (
@@ -17,18 +18,24 @@ const Navbar = () => {
             </div>
           </div>
           <div className="flex-1 flex justify-center">
-            <div className="text-center">
+            {/* Si quieres que el logo te lleve al inicio, también podemos poner un Link aquí */}
+            <Link to="/" className="text-center block hover:opacity-80 transition-opacity">
               <h1 className="text-4xl md:text-5xl font-script text-nalu-pink">
                 Nalu
               </h1>
               <p className="text-[10px] uppercase tracking-[0.3em] text-gray-400 font-bold">
                 Marroquinería
               </p>
-            </div>
+            </Link>
           </div>
 
           <div className="flex-1 flex justify-end items-center space-x-6 text-white">
-            <User className="w-5 h-5 cursor-pointer hover:text-nalu-pink transition-colors" />
+            
+            {/* <-- 2. ENVOLVEMOS EL ÍCONO DEL USUARIO EN UN LINK --> */}
+            <Link to="/login" className="hover:text-nalu-pink transition-colors">
+              <User className="w-5 h-5 cursor-pointer" />
+            </Link>
+
             <div className="relative cursor-pointer group">
               <ShoppingCart className="w-5 h-5 group-hover:text-nalu-pink transition-colors" />
               <span className="absolute -top-2 -right-2 bg-nalu-pink text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">0</span>

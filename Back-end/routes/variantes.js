@@ -23,8 +23,9 @@ router.get("/producto/:producto_id", async (req, res) => {
 
 // POST - Crear una variante (Color/Material/Stock)
 router.post(
-  "/", esAdmin,
+  "/",
   verificarAutenticacion,
+  esAdmin,
   upload.single('imagen'), // Para la foto del color específico
   [
     body("producto_id").isInt({ min: 1 }),
@@ -55,7 +56,7 @@ router.post(
 );
 
 // PUT - Actualizar stock o color
-router.put("/:id", esAdmin , verificarAutenticacion, validarId, verificarValidaciones, async (req, res) => {
+router.put("/:id", verificarAutenticacion, esAdmin , validarId, verificarValidaciones, async (req, res) => {
     try {
         const id = Number(req.params.id);
         const { color, material, stock } = req.body;
@@ -72,7 +73,7 @@ router.put("/:id", esAdmin , verificarAutenticacion, validarId, verificarValidac
 });
 
 // DELETE - Eliminar variante
-router.delete("/:id", esAdmin, verificarAutenticacion, validarId, verificarValidaciones, async (req, res) => {
+router.delete("/:id", verificarAutenticacion, esAdmin, validarId, verificarValidaciones, async (req, res) => {
   try {
     await pool.execute("DELETE FROM variantes WHERE id = ?", [req.params.id]);
     res.json({ success: true, message: "Variante eliminada" });

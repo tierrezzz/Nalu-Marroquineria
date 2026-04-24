@@ -10,6 +10,7 @@ import productosRouter from './routes/productos.js';
 import clientesRouter from './routes/clientes.js';
 import categoriasRouter from './routes/categorias.js';
 import variantesRouter from './routes/variantes.js'; 
+import { limatadorGeneral, limitadorRegistro } from './middlewares/rateLimiter.js';
 // import pedidosRouter from './routes/pedidos.js';     
 
 dotenv.config();
@@ -22,6 +23,7 @@ const PORT = process.env.PORT || 3000;
 // ========================================
 app.use(cors());
 app.use(express.json());
+app.use(limatadorGeneral);
 
 // Configurar Passport
 authConfig();
@@ -62,6 +64,9 @@ app.get('/health', async (req, res) => {
         res.status(500).json({ success: false, database: 'disconnected', error: error.message });
     }
 });
+
+// rate limiter específico para registro de usuarios (más estricto)
+app.use('/usuarios', limitadorRegistro);
 
 // rutas
 app.use("/auth", authRouter);

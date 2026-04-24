@@ -1,33 +1,34 @@
 @url = http://localhost:3000
-### Obtener todos los clientes
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJGYWN1bmRvIiwicm9sIjoiYWRtaW4iLCJpYXQiOjE3NzYwNTYyNjgsImV4cCI6MTc3NjA3MDY2OH0.SLR-b24yVUM1bpjZKPR4aJikh4M7Wf3--dgnf8sTJGU
+
+### [ADMIN] Listar todos los perfiles de clientes
 GET {{url}}/clientes
+Authorization: Bearer {{token}}
 Accept: application/json
 
-### Obtener cliente por ID
-GET {{url}}/clientes/6
+### [CLIENTE] Ver mi propio perfil
+GET {{url}}/clientes/me
+Authorization: Bearer {{token}}
 Accept: application/json
 
-### Crear nuevo cliente
+### [CLIENTE] Completar mi perfil por primera vez
 POST {{url}}/clientes
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "nombre": "Adriel Chad",
-  "apellido": "Barrios",
-  "telefono": "+123344534344",
-  "email": "chadNNn@gmail.com"
+    "nombre_completo": "Juan Pérez",
+    "dni": "35123456",
+    "telefono": "3804123456"
 }
 
-### Actualizar cliente
-PUT {{url}}/clientes/8
+### [CLIENTE] Actualizar mis datos personales
+PUT {{url}}/clientes/me
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "nombre": "Adriel Onechan",
-  "apellido": "Barrios",
-  "telefono": "+123344534344",
-  "email": "chadNNn@gmail.com"
+    "nombre_completo": "Juan Pérez Lopez",
+    "dni": "35123456",
+    "telefono": "3804998877"
 }
-
-### Eliminar cliente
-DELETE {{url}}/clientes/1

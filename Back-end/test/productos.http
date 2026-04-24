@@ -1,7 +1,5 @@
 @url = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJGYWN1bmRvIiwicm9sIjoiYWRtaW4iLCJpYXQiOjE3NzYwNTYyNjgsImV4cCI6MTc3NjA3MDY2OH0.SLR-b24yVUM1bpjZKPR4aJikh4M7Wf3--dgnf8sTJGU
-GET {{url}}/productos
-Accept: application/json
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJmYWN1bmRvX3Rlc3RAZ21haWwuY29tIiwicm9sIjoiY2xpZW50ZSIsImlhdCI6MTc3Njg5Njg3NywiZXhwIjoxNzc2OTExMjc3fQ.hadAANn-XS8A326O6nvgkp8Znw5q54apCnVOPANaAWs
 
 ### Obtener producto por ID
 GET {{url}}/productos/1

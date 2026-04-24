@@ -27,8 +27,8 @@ router.get("/", async (req, res) => {
 // POST - Crear categoría (Protegido)
 router.post(
   "/",
-  esAdmin,
   verificarAutenticacion,
+  esAdmin,
   body("nombre", "El nombre es requerido").isString().notEmpty(),
   verificarValidaciones,
   async (req, res) => {
@@ -56,8 +56,9 @@ router.post(
 
 // DELETE - Eliminar categoría (Solo si no tiene productos asociados)
 router.delete(
-  "/:id", esAdmin,
+  "/:id",
   verificarAutenticacion,
+  esAdmin,
   validarId,
   verificarValidaciones,
   async (req, res) => {

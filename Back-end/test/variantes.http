@@ -1,7 +1,6 @@
 @url = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImlhdCI6MTc3NTc3NzYyNywiZXhwIjoxNzc1NzkyMDI3fQ.fRX7awQTWV9dATYquCo_Z1hTIRXSRvWXfG8tbIyQz2w
-@productoId = 1
-
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJmYWN1bmRvX3Rlc3RAZ21haWwuY29tIiwicm9sIjoiY2xpZW50ZSIsImlhdCI6MTc3Njg5Njg3NywiZXhwIjoxNzc2OTExMjc3fQ.hadAANn-XS8A326O6nvgkp8Znw5q54apCnVOPANaAWs
+@productoId = 2
 ### 1. Listar variantes de un producto específico
 # Útil para mostrar los colores disponibles en el Front-end
 GET {{url}}/variantes/producto/{{productoId}}
@@ -41,12 +40,12 @@ Content-Type: application/json
 
 ### 4. Actualizar stock o detalles de una variante
 # Reemplazá el /1 por el ID de la variante que quieras editar
-PUT {{url}}/variantes/1
+PUT {{url}}/variantes/4
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-    "color": "Negro",
+    "color": "Azul",
     "material": "Cuero Vacuno Premium",
     "stock": 15
 }

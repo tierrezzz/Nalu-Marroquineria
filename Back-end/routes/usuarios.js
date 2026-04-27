@@ -3,6 +3,7 @@ import { pool } from "../db.js";
 import { validarId, verificarValidaciones, esAdmin } from "../middlewares/validaciones.js";
 import { body } from "express-validator";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { verificarAutenticacion } from "./auth.js";
 
 const router = express.Router();
@@ -62,11 +63,14 @@ router.post(
         [email, hashedPassword]
       );
 
+      const payload = { id: result.insertId, email, rol: 'cliente' };
+      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "4h" });
+
       res.status(201).json({
         success: true,
+        token, 
         data: { id: result.insertId, email, rol: 'cliente' }, 
       });
-
     } catch (error) {
        res.status(500).json({ success: false, error: "Error interno" });
     }

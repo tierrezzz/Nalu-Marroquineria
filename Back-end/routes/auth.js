@@ -97,7 +97,7 @@ router.post(
       );
 
       if (usuarios.length === 0) {
-        return res.status(401).json({ success: false, error: "Credenciales inválidas" });
+        return res.status(401).json({ success: false, error: "Error al iniciar sesión: contraseña o email incorrectos." });
       }
 
       const usuario = usuarios[0];
@@ -111,7 +111,7 @@ router.post(
 
       const passwordComparada = await bcrypt.compare(password, usuario.password);
       if (!passwordComparada) {
-        return res.status(401).json({ success: false, error: "Credenciales inválidas" });
+        return res.status(401).json({ success: false, error: "Error al iniciar sesión: contraseña o email incorrectos." });
       }
 
       const payload = { id: usuario.id, email: usuario.email, rol: usuario.rol };

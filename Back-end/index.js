@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import passport from 'passport'; 
 import { conectarDB } from './db.js';
 
 // Importar rutas
@@ -11,7 +12,6 @@ import clientesRouter from './routes/clientes.js';
 import categoriasRouter from './routes/categorias.js';
 import variantesRouter from './routes/variantes.js'; 
 import { limatadorGeneral, limitadorRegistro } from './middlewares/rateLimiter.js';
-// import pedidosRouter from './routes/pedidos.js';     
 
 dotenv.config();
 
@@ -25,7 +25,9 @@ app.use(cors());
 app.use(express.json());
 app.use(limatadorGeneral);
 
-// Configurar Passport
+app.use(passport.initialize()); // <-- 2. INICIALIZAR PASSPORT AQUÍ
+
+// Configurar Passport (ahora solo está una vez)
 authConfig();
 
 // Logger simple

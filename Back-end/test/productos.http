@@ -1,5 +1,8 @@
 @url = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJmYWN1bmRvX3Rlc3RAZ21haWwuY29tIiwicm9sIjoiY2xpZW50ZSIsImlhdCI6MTc3Njg5Njg3NywiZXhwIjoxNzc2OTExMjc3fQ.hadAANn-XS8A326O6nvgkp8Znw5q54apCnVOPANaAWs
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NywiZW1haWwiOiJmYWN1bmRvX3Rlc3RAZ21haWwuY29tIiwicm9sIjoiY2xpZW50ZSIsImlhdCI6MTc3NzMzMTA0MCwiZXhwIjoxNzc3MzQ1NDQwfQ.JtbKgA1VeF2zKTzgwh6BCjzdAUd-YNYgdo9FkvMSh-c
+### Obtener todos los productos (Nalu Marroquinería)
+GET {{url}}/productos
+Accept: application/json
 
 ### Obtener producto por ID
 GET {{url}}/productos/1

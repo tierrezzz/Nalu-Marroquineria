@@ -1,6 +1,6 @@
 @url = http://localhost:3000
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiZW1haWwiOiJmYWN1bmRvX3Rlc3RAZ21haWwuY29tIiwicm9sIjoiY2xpZW50ZSIsImlhdCI6MTc3Njg5Njg3NywiZXhwIjoxNzc2OTExMjc3fQ.hadAANn-XS8A326O6nvgkp8Znw5q54apCnVOPANaAWs
-@productoId = 2
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NywiZW1haWwiOiJmYWN1bmRvX3Rlc3RAZ21haWwuY29tIiwicm9sIjoiY2xpZW50ZSIsImlhdCI6MTc3NzAxMjkwMiwiZXhwIjoxNzc3MDI3MzAyfQ.GPvfm4VsmSsS-DhXy1hgWfp0QU3m-M1pJynHd0ag0yM
+@productoId = 1
 ### 1. Listar variantes de un producto específico
 # Útil para mostrar los colores disponibles en el Front-end
 GET {{url}}/variantes/producto/{{productoId}}
@@ -53,5 +53,5 @@ Content-Type: application/json
 ###
 
 ### 5. Eliminar una variante
-DELETE {{url}}/variantes/1
+DELETE {{url}}/variantes/7
 Authorization: Bearer {{token}}

@@ -8,7 +8,6 @@ function Register() {
   const [error, setError] = useState(null);
 
   const [values, setValues] = useState({
-    username: "",
     email: "",
     password: "",
   });
@@ -23,13 +22,12 @@ function Register() {
     e.preventDefault();
     setError(null);
 
-    const result = await register(values.username, values.email, values.password);
+    const result = await register(values.email, values.password);
 
-    if (result.error) {
+    if (result && result.error) {
       setError(result.error);
-    } else {
-      // Registro exitoso: lo mandamos al login para que entre
-      navigate("/login");
+    } else if (result) {
+      navigate("/");
     }
   };
 
@@ -39,19 +37,9 @@ function Register() {
         <h1 className="text-4xl font-black text-nalu-dark mb-2 uppercase tracking-tighter">
           Nalu <span className="text-nalu-pink">✦</span>
         </h1>
-        <h2 className="text-xl font-bold text-gray-800 mb-6 italic">Crear tu cuenta</h2>
+        <p className="text-gray-400 italic mb-8">Crea tu cuenta</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            name="username"
-            placeholder="Nombre de Usuario"
-            className="w-full p-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-nalu-pink/20 outline-none transition-all"
-            value={values.username}
-            onChange={handleChange}
-            required
-          />
-
           <input
             type="email"
             name="email"
@@ -71,6 +59,10 @@ function Register() {
             onChange={handleChange}
             required
           />
+
+          <p className="text-xs text-gray-400 text-left px-2 mt-1">
+            * Debe tener al menos 8 caracteres y 1 número.
+          </p>
 
           <button type="submit" className="w-full bg-nalu-dark text-white py-4 rounded-2xl font-bold hover:bg-black transition-all shadow-lg mt-4">
             Registrarme

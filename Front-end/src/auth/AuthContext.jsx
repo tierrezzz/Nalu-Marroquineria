@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
 
 export const AuthContext = createContext();
 
@@ -49,11 +49,41 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("token", data.token);
     const decoded = jwtDecode(data.token);
     setUser({ ...decoded, logged: true });
-    
+
     return data;
   };
 
-  // Esta función es nueva: la usará LoginSuccess para Google
+  const register = async (email, password) => {
+    try {
+      const res = await fetch(`${API_URL}/usuarios`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        const errorMsg =
+          data.error ||
+          (data.errors && data.errors[0]?.msg) ||
+          "Fallo el registro";
+        return { error: errorMsg };
+      }
+
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        const decoded = jwtDecode(data.token);
+        setUser({ ...decoded, logged: true });
+      }
+
+      return data;
+    } catch (error) {
+      return { error: "Error de conexión" };
+    }
+  };
+
+  // Esta función la usará LoginSuccess para Google
   const loginWithGoogle = (token) => {
     localStorage.setItem("token", token);
     const decoded = jwtDecode(token);
@@ -68,7 +98,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loginWithGoogle, loading }}>
+    <AuthContext.Provider
+      value={{ user, login, register, logout, loginWithGoogle, loading }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );

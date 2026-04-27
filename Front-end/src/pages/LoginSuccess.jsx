@@ -9,7 +9,6 @@ const LoginSuccess = () => {
     const token = searchParams.get("token");
     if (token) {
       localStorage.setItem("token", token);
-      // Recargamos la página al home para que el Context detecte el token nuevo
       window.location.href = "/";
     } else {
       navigate("/login");

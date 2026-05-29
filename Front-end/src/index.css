@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap');
+
+
+@theme {
+  --color-nalu-pink: #FFA6D9;
+  --color-nalu-pink-light: #FFEDF6;
+  --color-nalu-yellow: #FFF7D6;
+  --color-nalu-dark: #2D2D2D;
+  --font-script: "Dancing Script", cursive;
+}
+
+#root {
+  width: 100% ;
+  max-width: none ;
+  margin: 0 ;
+  display: block ;
+}
+body {
+  margin: 0;
+  display: block; 
+  min-width: 100vw;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+}

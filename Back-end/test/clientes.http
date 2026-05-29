@@ -1,0 +1,34 @@
+@url = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJGYWN1bmRvIiwicm9sIjoiYWRtaW4iLCJpYXQiOjE3NzYwNTYyNjgsImV4cCI6MTc3NjA3MDY2OH0.SLR-b24yVUM1bpjZKPR4aJikh4M7Wf3--dgnf8sTJGU
+
+### [ADMIN] Listar todos los perfiles de clientes
+GET {{url}}/clientes
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### [CLIENTE] Ver mi propio perfil
+GET {{url}}/clientes/me
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### [CLIENTE] Completar mi perfil por primera vez
+POST {{url}}/clientes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nombre_completo": "Juan Pérez",
+    "dni": "35123456",
+    "telefono": "3804123456"
+}
+
+### [CLIENTE] Actualizar mis datos personales
+PUT {{url}}/clientes/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "nombre_completo": "Juan Pérez Lopez",
+    "dni": "35123456",
+    "telefono": "3804998877"
+}

@@ -1,0 +1,57 @@
+@url = http://localhost:3000
+
+
+### 1. Registro de Nuevo Usuario (Manual)
+# Probamos que el validador de .isEmail() funcione
+POST {{url}}/usuarios
+Content-Type: application/json
+
+{
+    "email": "facundo_test@gmail.com",
+    "password": "Hola1234password"
+}
+
+### 2. Intento de Registro con Email Inválido (Debe fallar)
+POST {{url}}/usuarios
+Content-Type: application/json
+
+{
+    "email": "esto_no_es_un_mail",
+    "password": "Hola1234password"
+}
+
+### 3. Login Manual
+# @name login
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "facundo_testeo@gmail.com",
+    "password": "Hola1234password"
+}
+
+### 4. Guardamos el token del login anterior
+@token = {{login.response.body.token}}
+
+### 5. Verificar Perfil (Usando el token generado)
+GET {{url}}/usuarios/me
+Authorization: Bearer {{token}}
+
+### Consultar por un usuario (protegido)
+GET {{url}}/usuarios/6
+Authorization: Bearer {{token}}
+
+### Actualizar un usuario (protegido)
+PUT {{url}}/usuarios/5
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "username": "ajskajskjaks",
+    "password": "hola123456"
+   
+}
+
+### Eliminar un usuario (protegido)
+DELETE {{url}}/usuarios/5
+Authorization: Bearer {{token}}

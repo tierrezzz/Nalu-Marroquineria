@@ -1,0 +1,44 @@
+@url = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NiwiZW1haWwiOiJmYWN1bmRvX3Rlc3Rlb0BnbWFpbC5jb20iLCJyb2wiOiJhZG1pbiIsImlhdCI6MTc3ODQyODAyMiwiZXhwIjoxNzc4NDQyNDIyfQ.OM49QrhxaKYvHyXo7NURvvlIN2-_zAVgTqbQnPsMLaU
+### Obtener todos los productos (Nalu Marroquinería)
+GET {{url}}/productos
+Accept: application/json
+
+### Obtener producto por ID
+GET {{url}}/productos/1
+Accept: application/json
+
+### Filtrar productos por categoría (Ej: Mochilas)
+GET {{url}}/productos?categoria_id=1
+Accept: application/json
+
+### Crear nuevo producto (Sin imagen)
+# Importante: precio -> precio_base
+POST {{url}}/productos
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Mochila Nalu Cuerina",
+  "descripcion": "Mochila de cuerina con forrería interna",
+  "precio_base": 25000.00,
+  "categoria_id": 1,
+  "activo": true
+}
+
+### Actualizar producto
+PUT {{url}}/productos/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombre": "Mochila Nalu Cuero - Reforzada",
+  "descripcion": "Versión con costuras reforzadas y cierres YKK",
+  "precio_base": 48500.00,
+  "categoria_id": 1,
+  "activo": true
+}
+
+### Eliminar producto
+DELETE {{url}}/productos/1
+Authorization: Bearer {{token}}

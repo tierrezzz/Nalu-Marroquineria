@@ -1,0 +1,57 @@
+@url = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NywiZW1haWwiOiJmYWN1bmRvX3Rlc3RAZ21haWwuY29tIiwicm9sIjoiY2xpZW50ZSIsImlhdCI6MTc3NzAxMjkwMiwiZXhwIjoxNzc3MDI3MzAyfQ.GPvfm4VsmSsS-DhXy1hgWfp0QU3m-M1pJynHd0ag0yM
+@productoId = 1
+### 1. Listar variantes de un producto específico
+# Útil para mostrar los colores disponibles en el Front-end
+GET {{url}}/variantes/producto/{{productoId}}
+Accept: application/json
+
+###
+
+### 2. Crear una nueva variante (Stock de un color)
+# Nota: Como usa Multer para imagen, este test es para datos de texto.
+# Para subir la foto real del color, usá Postman (form-data).
+POST {{url}}/variantes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "producto_id": {{productoId}},
+    "color": "Blanco",
+    "material": "Cuero Vacuno",
+    "stock": 10
+}
+
+###
+
+### 3. Crear otra variante (Mismo producto, distinto color)
+POST {{url}}/variantes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "producto_id": {{productoId}},
+    "color": "Suela",
+    "material": "Cuero Vacuno",
+    "stock": 5
+}
+
+###
+
+### 4. Actualizar stock o detalles de una variante
+# Reemplazá el /1 por el ID de la variante que quieras editar
+PUT {{url}}/variantes/4
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "color": "Azul",
+    "material": "Cuero Vacuno Premium",
+    "stock": 15
+}
+
+###
+
+### 5. Eliminar una variante
+DELETE {{url}}/variantes/7
+Authorization: Bearer {{token}}

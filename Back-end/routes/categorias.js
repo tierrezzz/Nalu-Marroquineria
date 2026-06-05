@@ -54,6 +54,37 @@ router.post(
   },
 );
 
+router.put(
+  "/:id",
+  verificarAutenticacion,
+  esAdmin,
+  validarId,
+  body("nombre", "El nombre es requerido").isString().notEmpty(),
+  verificarValidaciones,
+  async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const { nombre } = req.body;
+
+      const [result] = await pool.execute(
+        "UPDATE categorias SET nombre = ? WHERE id = ?",
+        [nombre, id]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: "Categoría no encontrada" });
+      }
+
+      res.json({ success: true, message: "Categoría actualizada con éxito" });
+    } catch (error) {
+      if (error.code === "ER_DUP_ENTRY") {
+        return res.status(400).json({ success: false, message: "Ya existe otra categoría con ese nombre" });
+      }
+      res.status(500).json({ success: false, message: "Error al actualizar la categoría" });
+    }
+  }
+);
+
 // DELETE - Eliminar categoría (Solo si no tiene productos asociados)
 router.delete(
   "/:id",
